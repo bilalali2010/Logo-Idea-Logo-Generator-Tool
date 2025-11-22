@@ -1,39 +1,16 @@
 import streamlit as st
-from diffusers import StableDiffusionPipeline
-import torch
+import requests
 from PIL import Image
 import io
+import base64
 
-# -------------------------
-# Page config
-# -------------------------
 st.set_page_config(page_title="Logo Idea Generator", page_icon="🎨", layout="wide")
 
-# -------------------------
-# Sidebar
-# -------------------------
 st.sidebar.header("Settings")
 hf_token = st.sidebar.text_input("Enter Hugging Face Token 🔑", type="password")
 
-# -------------------------
-# Main app
-# -------------------------
 st.title("🤖 Logo Idea & Generator Tool")
-st.markdown("Generate creative logos using AI!")
-
 prompt = st.text_input("Enter your logo idea prompt:")
-
-# -------------------------
-# Cache model loading
-# -------------------------
-@st.cache_resource(show_spinner=True)
-def load_model(token):
-    pipe = StableDiffusionPipeline.from_pretrained(
-        "runwayml/stable-diffusion-v1-5",
-        use_auth_token=token
-    )
-    pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
-    return pipe
 
 if st.button("Generate Logo"):
 
@@ -43,13 +20,20 @@ if st.button("Generate Logo"):
         st.error("Please enter a prompt for the logo!")
     else:
         try:
-            with st.spinner("Loading model..."):
-                pipe = load_model(hf_token)
+            st.info("Generating your logo...")
 
-            with st.spinner("Generating your logo..."):
-                image = pipe(prompt).images[0]
+            headers = {"Authorization": f"Bearer {hf_token}"}
+            API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
 
-                # Display image
+            payload = {"inputs": prompt}
+
+            response = requests.post(API_URL, headers=headers, json=payload)
+            
+            if response.status_code != 200:
+                st.error(f"Error: {response.status_code}, {response.text}")
+            else:
+                image_bytes = response.content
+                image = Image.open(io.BytesIO(image_bytes))
                 st.image(image, caption="Generated Logo", use_column_width=True)
 
                 # Download option
