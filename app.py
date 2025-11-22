@@ -23,6 +23,18 @@ st.markdown("Generate creative logos using AI!")
 
 prompt = st.text_input("Enter your logo idea prompt:")
 
+# -------------------------
+# Cache model loading
+# -------------------------
+@st.cache_resource(show_spinner=True)
+def load_model(token):
+    pipe = StableDiffusionPipeline.from_pretrained(
+        "runwayml/stable-diffusion-v1-5",
+        use_auth_token=token
+    )
+    pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
+    return pipe
+
 if st.button("Generate Logo"):
 
     if not hf_token:
@@ -30,22 +42,17 @@ if st.button("Generate Logo"):
     elif not prompt:
         st.error("Please enter a prompt for the logo!")
     else:
-        with st.spinner("Generating your logo..."):
-            try:
-                # Load model
-                pipe = StableDiffusionPipeline.from_pretrained(
-                    "runwayml/stable-diffusion-v1-5",
-                    use_auth_token=hf_token
-                )
-                pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
+        try:
+            with st.spinner("Loading model..."):
+                pipe = load_model(hf_token)
 
-                # Generate image
+            with st.spinner("Generating your logo..."):
                 image = pipe(prompt).images[0]
 
                 # Display image
                 st.image(image, caption="Generated Logo", use_column_width=True)
 
-                # Optional: allow download
+                # Download option
                 buf = io.BytesIO()
                 image.save(buf, format="PNG")
                 st.download_button(
@@ -55,5 +62,5 @@ if st.button("Generate Logo"):
                     mime="image/png"
                 )
 
-            except Exception as e:
-                st.error(f"Failed to generate image: {e}")
+        except Exception as e:
+            st.error(f"Failed to generate image: {e}")
