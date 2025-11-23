@@ -1,6 +1,7 @@
 import svgwrite
 import random
 import base64
+import math
 
 # -------------------------
 # Supported shapes/styles
@@ -28,21 +29,18 @@ PALETTES = {
 }
 
 # -------------------------
-# Helper: embed local image as data URI
+# Helper functions
 # -------------------------
 def embed_image_as_datauri(path):
     with open(path, "rb") as f:
         raw = f.read()
     return "data:image/png;base64," + base64.b64encode(raw).decode("utf-8")
 
-# -------------------------
-# Helper: safe filename/text
-# -------------------------
 def sanify(text):
     return "".join(c for c in text if c.isalnum() or c in (" ", "-", "_")).replace(" ", "_")
 
 # -------------------------
-# Core: generate SVG logo
+# Core logo generator
 # -------------------------
 def generate_logo_svg(
     brand,
@@ -58,55 +56,88 @@ def generate_logo_svg(
     random.seed(seed)
     size = (420, 420)
     dwg = svgwrite.Drawing(size=(f"{size[0]}px", f"{size[1]}px"))
+    dwg.add(dwg.rect(insert=(0,0), size=(size[0], size[1]), fill="#ffffff"))
 
-    # White background for preview stability
-    dwg.add(dwg.rect(insert=(0, 0), size=(size[0], size[1]), fill="#ffffff"))
+    main_color = "#111111" if bw else color
+    accent_color = "#666666" if bw else (palette[1] if palette and len(palette)>1 else "#888888")
 
     group = dwg.g(id="logo_group")
 
-    # Decide colors
-    if bw:
-        main_color = "#111111"
-        accent_color = "#666666"
-    else:
-        main_color = color
-        accent_color = palette[1] if palette and len(palette) > 1 else "#888888"
-
     # -------------------------
-    # Draw simple shapes based on selection
+    # Shape drawing logic
     # -------------------------
     if shape == "Abstract Swirl":
-        for i in range(5):
+        for i in range(6):
             cx = random.randint(80, 340)
             cy = random.randint(80, 340)
             r = random.randint(30, 80)
-            group.add(dwg.circle(center=(cx, cy), r=r, fill="none", stroke=main_color, stroke_width=8, opacity=0.6))
+            opacity = random.uniform(0.3, 0.7)
+            group.add(dwg.circle(center=(cx, cy), r=r, fill="none", stroke=random.choice(palette), stroke_width=8, opacity=opacity))
+
     elif shape == "Geometric Cube":
         for i in range(3):
-            x = random.randint(50, 300)
-            y = random.randint(50, 300)
-            size_cube = random.randint(60, 100)
-            group.add(dwg.rect(insert=(x, y), size=(size_cube, size_cube), fill=main_color, stroke=accent_color, stroke_width=5, opacity=0.8))
+            x = random.randint(50, 280)
+            y = random.randint(50, 280)
+            s = random.randint(60, 100)
+            group.add(dwg.rect(insert=(x, y), size=(s, s), fill=random.choice(palette), stroke=accent_color, stroke_width=5, opacity=0.8))
+
     elif shape == "Rounded Blob":
-        path = dwg.path(d=f"M150,200 Q200,100 250,200 Q200,300 150,200 Z", fill=main_color, opacity=0.7)
-        group.add(path)
+        path_data = f"M{random.randint(100,150)},200 Q{random.randint(180,220)},100 {random.randint(250,300)},200 Q{random.randint(180,220)},300 {random.randint(100,150)},200 Z"
+        group.add(dwg.path(d=path_data, fill=main_color, opacity=0.7))
+
+    elif shape == "House / Roof":
+        # triangle roof
+        group.add(dwg.polygon(points=[(150,250),(210,150),(270,250)], fill=random.choice(palette)))
+        # rectangle house body
+        group.add(dwg.rect(insert=(170,250), size=(80,80), fill=random.choice(palette)))
+        # door
+        group.add(dwg.rect(insert=(200,280), size=(20,50), fill=accent_color))
+
+    elif shape == "Sports Ball":
+        group.add(dwg.circle(center=(210,210), r=80, fill=random.choice(palette), stroke=accent_color, stroke_width=5))
+        # simple inner lines
+        group.add(dwg.line(start=(210,130), end=(210,290), stroke=accent_color, stroke_width=3))
+        group.add(dwg.line(start=(130,210), end=(290,210), stroke=accent_color, stroke_width=3))
+
+    elif shape == "Tech Symbol":
+        for i in range(5):
+            x = random.randint(120,300)
+            y = random.randint(120,300)
+            group.add(dwg.circle(center=(x,y), r=10, fill=random.choice(palette)))
+            group.add(dwg.line(start=(210,210), end=(x,y), stroke=accent_color, stroke_width=2))
+
+    elif shape == "Badge / Emblem":
+        group.add(dwg.circle(center=(210,210), r=100, fill=random.choice(palette), stroke=accent_color, stroke_width=5))
+        group.add(dwg.circle(center=(210,210), r=70, fill="none", stroke=accent_color, stroke_width=3))
+
+    elif shape == "Paint Splash":
+        for i in range(8):
+            cx = random.randint(100,320)
+            cy = random.randint(100,320)
+            r = random.randint(10,40)
+            group.add(dwg.circle(center=(cx,cy), r=r, fill=random.choice(palette), opacity=random.uniform(0.3,0.7)))
+
+    elif shape == "Linked Rings":
+        for i in range(3):
+            cx = 180 + i*50
+            cy = 210
+            group.add(dwg.circle(center=(cx,cy), r=40, fill="none", stroke=random.choice(palette), stroke_width=6, opacity=0.7))
+
     else:
-        # fallback: simple circle
-        group.add(dwg.circle(center=(210, 210), r=80, fill=main_color, stroke=accent_color, stroke_width=6, opacity=0.8))
+        # fallback simple circle
+        group.add(dwg.circle(center=(210,210), r=80, fill=main_color, stroke=accent_color, stroke_width=5))
 
     # -------------------------
     # Embed image if provided
     # -------------------------
     if embed_image_datauri:
-        group.add(dwg.image(href=embed_image_datauri, insert=(150, 150), size=(120, 120)))
+        group.add(dwg.image(href=embed_image_datauri, insert=(150,150), size=(120,120)))
 
     # -------------------------
-    # Add brand text
+    # Add text
     # -------------------------
     dwg.add(group)
     dwg.add(dwg.text(brand, insert=(size[0]//2, size[1]-50), text_anchor="middle", font_size=24, fill=main_color, font_family="Arial"))
-
-    # Optional slogan
     if include_slogan and slogan:
         dwg.add(dwg.text(slogan, insert=(size[0]//2, size[1]-20), text_anchor="middle", font_size=16, fill=accent_color, font_family="Arial"))
 
