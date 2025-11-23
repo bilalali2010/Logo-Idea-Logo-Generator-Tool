@@ -1,7 +1,6 @@
 import svgwrite
 import random
 import base64
-from svgwrite.filters import Filter, FeGaussianBlur, FeOffset, FeMerge, FeMergeNode
 
 # -------------------------
 # Supported shapes/styles
@@ -47,6 +46,7 @@ TEMPLATES = {
 # Helper functions
 # -------------------------
 def embed_image_as_datauri(path):
+    """Convert local image to base64 data URI"""
     with open(path, "rb") as f:
         raw = f.read()
     return "data:image/png;base64," + base64.b64encode(raw).decode("utf-8")
@@ -89,19 +89,16 @@ def generate_logo_svg(
     defs.add(linear_grad)
 
     # -------------------------
-    # Drop shadow using proper svgwrite filters
+    # Drop shadow using supported svgwrite methods
     # -------------------------
     shadow_filter_id = f"shadow{random.randint(0,1000)}"
-    shadow_filter = defs.add(Filter(id=shadow_filter_id))
+    shadow_filter = defs.add(dwg.filter(id=shadow_filter_id))
+    shadow_filter.add(dwg.feGaussianBlur(in_='SourceAlpha', stdDeviation=4, result='blur'))
+    shadow_filter.add(dwg.feOffset(in_='blur', dx=4, dy=4, result='offsetBlur'))
 
-    blur = FeGaussianBlur(in_='SourceAlpha', stdDeviation=4, result='blur')
-    offset = FeOffset(in_='blur', dx=4, dy=4, result='offsetBlur')
-    merge = FeMerge()
-    merge.add(FeMergeNode(in_='offsetBlur'))
-    merge.add(FeMergeNode(in_='SourceGraphic'))
-
-    shadow_filter.add(blur)
-    shadow_filter.add(offset)
+    merge = dwg.feMerge()
+    merge.add(dwg.feMergeNode(in_='offsetBlur'))
+    merge.add(dwg.feMergeNode(in_='SourceGraphic'))
     shadow_filter.add(merge)
 
     # -------------------------
@@ -177,7 +174,7 @@ def generate_logo_svg(
     dwg.add(group)
 
     # -------------------------
-    # Brand & slogan text (outlined)
+    # Brand & slogan text
     # -------------------------
     text_font_size = 28 if len(brand) <= 12 else max(12, 28 - len(brand)//2)
     dwg.add(dwg.text(
