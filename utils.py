@@ -88,16 +88,29 @@ def generate_logo_svg(
     defs.add(linear_grad)
 
     # -------------------------
-    # Drop shadow (working version)
+    # Drop shadow (fixed)
     # -------------------------
     shadow_filter = dwg.filter(id=f"shadow{random.randint(0,1000)}")
-    blur = shadow_filter.feGaussianBlur(in_="SourceAlpha", stdDeviation=4, result="blur")
-    offset = shadow_filter.feOffset(in_="blur", dx=4, dy=4, result="offsetBlur")
-    merge = shadow_filter.feMerge()
-    merge.add_feMergeNode(in_="offsetBlur")
-    merge.add_feMergeNode(in_="SourceGraphic")
+
+    # Gaussian blur
+    blur = svgwrite.filters.FilterElement('feGaussianBlur', in_='SourceAlpha', stdDeviation=4, result='blur')
+    shadow_filter.add(blur)
+
+    # Offset
+    offset = svgwrite.filters.FilterElement('feOffset', in_='blur', dx=4, dy=4, result='offsetBlur')
+    shadow_filter.add(offset)
+
+    # Merge shadow and graphic
+    merge = svgwrite.filters.FilterElement('feMerge')
+    merge.add(svgwrite.filters.FilterElement('feMergeNode', in_='offsetBlur'))
+    merge.add(svgwrite.filters.FilterElement('feMergeNode', in_='SourceGraphic'))
+    shadow_filter.add(merge)
+
     defs.add(shadow_filter)
 
+    # -------------------------
+    # Logo group
+    # -------------------------
     group = dwg.g(id="logo_group", filter=f"url(#{shadow_filter.get_id()})")
 
     # -------------------------
@@ -178,7 +191,7 @@ def generate_logo_svg(
         alignment_baseline="middle",
         font_size=text_font_size,
         fill="#000000",
-        stroke="#ffffff",  # outline
+        stroke="#ffffff",
         stroke_width=1.5,
         font_family="Montserrat",
         font_weight="bold"
