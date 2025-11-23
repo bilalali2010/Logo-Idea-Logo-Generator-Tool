@@ -23,14 +23,18 @@ with st.sidebar:
     brand = st.text_input("Brand name", value="Bilal Tech")
     slogan = st.text_input("Slogan (optional)")
     color_palette = st.selectbox("Color Palette", list(PALETTES.keys()))
-    shape_style = st.selectbox("Shape Style", list(SHAPES.keys()))
+    shape_style = st.selectbox("Shape Style", SHAPES)
     n_variations = st.slider("How many variations to generate", 1, 6, 3)
     include_slogan = st.checkbox("Include slogan under the logo", value=bool(slogan))
     embed_sample = st.checkbox("Embed sample image inside logo (demo)")
 
 # Multiple shape selection
 st.markdown("**Styles**")
-selected_shapes = st.multiselect("Choose shapes/styles (you can pick multiple)", SHAPES, default=[SHAPES[0]])
+selected_shapes = st.multiselect(
+    "Choose shapes/styles (you can pick multiple)",
+    SHAPES,
+    default=[SHAPES[0]]
+)
 
 # Color options
 st.markdown("**Colors**")
