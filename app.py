@@ -4,7 +4,8 @@ from utils import (
     PALETTES,
     SHAPES,
     embed_image_as_datauri,
-    sanify
+    sanify,
+    TEMPLATES
 )
 import base64
 
@@ -16,16 +17,48 @@ st.title("AI Logo Generator — Multi-Shape Professional Logos")
 st.write("Generate modern, high-quality SVG logos in multiple styles. No GPU required — pure SVG + Python.")
 
 # -------------------------
+# Template selection
+# -------------------------
+st.markdown("**Templates**")
+selected_template_name = st.selectbox("Choose a starting template (optional)", ["None"] + list(TEMPLATES.keys()))
+
+# Default settings
+shape_style = SHAPES[0]
+palette_choice = list(PALETTES.keys())[0]
+include_slogan = False
+custom_color = None
+
+if selected_template_name != "None":
+    template = TEMPLATES[selected_template_name]
+    shape_style = template["shape"]
+    palette_choice = template["palette"]
+    include_slogan = template.get("include_slogan", False)
+    custom_color = template.get("custom_color", None)
+    
+    # Show template preview
+    svg_preview = generate_logo_svg(
+        brand="Sample",
+        shape=template["shape"],
+        color=template["custom_color"] or PALETTES[template["palette"]][0],
+        include_slogan=template.get("include_slogan", False),
+        slogan="Your Slogan",
+        palette=PALETTES[template["palette"]],
+        seed=0
+    )
+    st.markdown("**Template Preview:**")
+    st.components.v1.html(svg_preview, height=200)
+
+# -------------------------
 # Sidebar settings
 # -------------------------
 with st.sidebar:
     st.header("Generator Settings")
     brand = st.text_input("Brand name", value="Bilal Tech")
     slogan = st.text_input("Slogan (optional)")
-    color_palette = st.selectbox("Color Palette", list(PALETTES.keys()))
-    shape_style = st.selectbox("Shape Style", SHAPES)
+    color_palette = st.selectbox("Color Palette", list(PALETTES.keys()), index=list(PALETTES.keys()).index(palette_choice))
+    shape_style = st.selectbox("Shape Style", SHAPES, index=SHAPES.index(shape_style))
     n_variations = st.slider("How many variations to generate", 1, 6, 3)
-    include_slogan = st.checkbox("Include slogan under the logo", value=bool(slogan))
+    include_slogan = st.checkbox("Include slogan under the logo", value=include_slogan)
     embed_sample = st.checkbox("Embed sample image inside logo (demo)")
 
 # Multiple shape selection
@@ -33,15 +66,14 @@ st.markdown("**Styles**")
 selected_shapes = st.multiselect(
     "Choose shapes/styles (you can pick multiple)",
     SHAPES,
-    default=[SHAPES[0]]
+    default=[shape_style]
 )
 
 # Color options
 st.markdown("**Colors**")
-palette_choice = st.selectbox("Palette", list(PALETTES.keys()))
+palette_choice = st.selectbox("Palette", list(PALETTES.keys()), index=list(PALETTES.keys()).index(palette_choice))
 color_mode = st.radio("Color mode", ["Palette (recommended)", "Custom main color", "Black & White"], index=0)
-custom_color = None
-if color_mode == "Custom main color":
+if color_mode == "Custom main color" and custom_color is None:
     custom_color = st.color_picker("Choose main color", "#1f77b4")
 
 # Image upload
