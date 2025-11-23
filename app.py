@@ -1,50 +1,78 @@
+# app.py
 import streamlit as st
-import requests
-from PIL import Image
-import io
-import base64
+from utils import generate_logo_svg, generate_logo_prompt
 
-st.set_page_config(page_title="Logo Idea Generator", page_icon="🎨", layout="wide")
 
-st.sidebar.header("Settings")
-hf_token = st.sidebar.text_input("Enter Hugging Face Token 🔑", type="password")
+st.set_page_config(page_title="AI Logo Generator", layout="wide")
 
-st.title("🤖 Logo Idea & Generator Tool")
-prompt = st.text_input("Enter your logo idea prompt:")
 
-if st.button("Generate Logo"):
+st.title("🎨 AI Logo & Logo Idea Generator")
+st.write("Generate unique logo prompts or instantly create minimal SVG logos — 100% free & CPU‑friendly.")
 
-    if not hf_token:
-        st.error("Please enter your Hugging Face token in the sidebar!")
-    elif not prompt:
-        st.error("Please enter a prompt for the logo!")
-    else:
-        try:
-            st.info("Generating your logo...")
 
-            headers = {"Authorization": f"Bearer {hf_token}"}
-            API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+mode = st.radio("Choose Mode", ["Generate Logo Idea Prompt", "Generate Simple SVG Logo"])
 
-            payload = {"inputs": prompt}
 
-            response = requests.post(API_URL, headers=headers, json=payload)
-            
-            if response.status_code != 200:
-                st.error(f"Error: {response.status_code}, {response.text}")
-            else:
-                image_bytes = response.content
-                image = Image.open(io.BytesIO(image_bytes))
-                st.image(image, caption="Generated Logo", use_column_width=True)
+if mode == "Generate Logo Idea Prompt":
+brand = st.text_input("Brand Name")
+desc = st.text_area("Describe your brand (optional)")
 
-                # Download option
-                buf = io.BytesIO()
-                image.save(buf, format="PNG")
-                st.download_button(
-                    label="Download Logo",
-                    data=buf,
-                    file_name="generated_logo.png",
-                    mime="image/png"
-                )
 
-        except Exception as e:
-            st.error(f"Failed to generate image: {e}")
+if st.button("Generate Prompt"):
+if brand.strip() == "":
+st.error("Brand name required.")
+else:
+prompt = generate_logo_prompt(brand, desc)
+st.success("Prompt generated:")
+st.code(prompt)
+
+
+else:
+brand = st.text_input("Brand Name for SVG Logo")
+color = st.color_picker("Choose Logo Color", "#000000")
+
+
+if st.button("Generate SVG Logo"):
+if brand.strip() == "":
+st.error("Brand name required.")
+else:
+svg = generate_logo_svg(brand, color)
+st.success("SVG Logo Generated:")
+st.code(svg, language="xml")
+st.download_button("Download SVG Logo", svg, f"{brand}_logo.svg")
+
+
+
+
+# utils.py
+import svgwrite
+
+
+# Generate AI-styled logo prompt
+def generate_logo_prompt(brand, desc=""):
+base = f"Create a modern, clean vector logo for the brand '{brand}'. Style: minimal, geometric, flat design."
+if desc:
+base += f" Brand description: {desc}."
+return base + " Provide multiple unique variations."
+
+
+
+
+# Minimal SVG Logo generator (CPU‑friendly)
+def generate_logo_svg(brand, color):
+dwg = svgwrite.Drawing(size=(300, 300))
+
+
+# geometric circle background
+dwg.add(dwg.circle(center=(150, 130), r=70, fill=color, opacity=0.8))
+
+
+# first letter icon
+dwg.add(dwg.text(brand[0].upper(), insert=(130, 165), font_size="80px", fill="#ffffff"))
+
+
+# brand name
+dwg.add(dwg.text(brand, insert=(70, 260), font_size="26px", fill=color))
+
+
+return dwg.tostring()
