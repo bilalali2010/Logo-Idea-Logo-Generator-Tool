@@ -16,7 +16,13 @@ st.write("Generate modern, high-quality SVG logos in multiple styles. No GPU req
 
 # ----- Sidebar -----
 with st.sidebar:
-st.header("Generator Settings")
+    st.header("Generator Settings")
+
+    logo_text = st.text_input("Logo Text", "")
+    tagline = st.text_input("Tagline (Optional)", "")
+    color_palette = st.selectbox("Color Palette", list(PALETTES.keys()))
+    shape_style = st.selectbox("Shape Style", list(SHAPES.keys()))
+
 brand = st.text_input("Brand name", value="Bilal Tech")
 slogan = st.text_input("Slogan (optional)")
 
