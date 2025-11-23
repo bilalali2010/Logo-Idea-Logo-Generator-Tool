@@ -88,30 +88,23 @@ def generate_logo_svg(
     defs.add(linear_grad)
 
     # -------------------------
-    # Drop shadow (fixed)
+    # Drop shadow (using raw SVG)
     # -------------------------
-    shadow_filter = dwg.filter(id=f"shadow{random.randint(0,1000)}")
-
-    # Gaussian blur
-    blur = svgwrite.filters.FilterElement('feGaussianBlur', in_='SourceAlpha', stdDeviation=4, result='blur')
-    shadow_filter.add(blur)
-
-    # Offset
-    offset = svgwrite.filters.FilterElement('feOffset', in_='blur', dx=4, dy=4, result='offsetBlur')
-    shadow_filter.add(offset)
-
-    # Merge shadow and graphic
-    merge = svgwrite.filters.FilterElement('feMerge')
-    merge.add(svgwrite.filters.FilterElement('feMergeNode', in_='offsetBlur'))
-    merge.add(svgwrite.filters.FilterElement('feMergeNode', in_='SourceGraphic'))
-    shadow_filter.add(merge)
-
-    defs.add(shadow_filter)
+    shadow_filter_id = f"shadow{random.randint(0,1000)}"
+    shadow_filter = dwg.defs.add(dwg.filter(id=shadow_filter_id))
+    shadow_filter.add(dwg.raw(f'''
+        <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+        <feOffset in="blur" dx="4" dy="4" result="offsetBlur"/>
+        <feMerge>
+            <feMergeNode in="offsetBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+    '''))
 
     # -------------------------
     # Logo group
     # -------------------------
-    group = dwg.g(id="logo_group", filter=f"url(#{shadow_filter.get_id()})")
+    group = dwg.g(id="logo_group", filter=f"url(#{shadow_filter_id})")
 
     # -------------------------
     # Shape drawing
