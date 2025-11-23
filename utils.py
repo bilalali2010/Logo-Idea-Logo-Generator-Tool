@@ -28,7 +28,7 @@ PALETTES = {
 }
 
 # -------------------------
-# Templates
+# Templates (expanded)
 # -------------------------
 TEMPLATES = {
     "Modern Badge": {
@@ -55,6 +55,36 @@ TEMPLATES = {
         "include_slogan": True,
         "custom_color": None
     },
+    "Abstract Swirl": {
+        "shape": "Abstract Swirl",
+        "palette": "Vibrant",
+        "include_slogan": True,
+        "custom_color": None
+    },
+    "Rounded Logo": {
+        "shape": "Rounded Blob",
+        "palette": "Pastel",
+        "include_slogan": True,
+        "custom_color": None
+    },
+    "Home & Roof": {
+        "shape": "House / Roof",
+        "palette": "Modern Dark",
+        "include_slogan": True,
+        "custom_color": None
+    },
+    "Sporty Emblem": {
+        "shape": "Sports Ball",
+        "palette": "Vibrant",
+        "include_slogan": True,
+        "custom_color": None
+    },
+    "Linked Circles": {
+        "shape": "Linked Rings",
+        "palette": "Mono",
+        "include_slogan": False,
+        "custom_color": None
+    }
 }
 
 # -------------------------
