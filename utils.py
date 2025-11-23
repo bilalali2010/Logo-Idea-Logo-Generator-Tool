@@ -89,17 +89,19 @@ def generate_logo_svg(
     defs.add(linear_grad)
 
     # -------------------------
-    # Drop shadow using supported svgwrite methods
+    # Drop shadow (raw SVG)
     # -------------------------
     shadow_filter_id = f"shadow{random.randint(0,1000)}"
-    shadow_filter = defs.add(dwg.filter(id=shadow_filter_id))
-    shadow_filter.add(dwg.feGaussianBlur(in_='SourceAlpha', stdDeviation=4, result='blur'))
-    shadow_filter.add(dwg.feOffset(in_='blur', dx=4, dy=4, result='offsetBlur'))
-
-    merge = dwg.feMerge()
-    merge.add(dwg.feMergeNode(in_='offsetBlur'))
-    merge.add(dwg.feMergeNode(in_='SourceGraphic'))
-    shadow_filter.add(merge)
+    shadow_filter = dwg.defs.add(dwg.raw(f'''
+    <filter id="{shadow_filter_id}" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+      <feOffset in="blur" dx="4" dy="4" result="offsetBlur"/>
+      <feMerge>
+        <feMergeNode in="offsetBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    '''))
 
     # -------------------------
     # Logo group
