@@ -157,12 +157,33 @@ def generate_logo_svg(
     if embed_image_datauri:
         group.add(dwg.image(href=embed_image_datauri, insert=(150,150), size=(120,120)))
 
-    # -------------------------
-    # Add text
-    # -------------------------
     dwg.add(group)
-    dwg.add(dwg.text(brand, insert=(size[0]//2, size[1]-50), text_anchor="middle", font_size=24, fill=main_color, font_family="Arial"))
+
+    # -------------------------
+    # Add brand text inside shape
+    # -------------------------
+    text_font_size = 24 if len(brand) <= 12 else max(12, 24 - len(brand)//2)
+    dwg.add(dwg.text(
+        brand,
+        insert=(size[0]//2, size[1]//2),
+        text_anchor="middle",
+        alignment_baseline="middle",
+        font_size=text_font_size,
+        fill=main_color,
+        font_family="Arial",
+        font_weight="bold"
+    ))
+
+    # Optional slogan inside shape, below brand
     if include_slogan and slogan:
-        dwg.add(dwg.text(slogan, insert=(size[0]//2, size[1]-20), text_anchor="middle", font_size=16, fill=accent_color, font_family="Arial"))
+        dwg.add(dwg.text(
+            slogan,
+            insert=(size[0]//2, size[1]//2 + text_font_size + 10),
+            text_anchor="middle",
+            alignment_baseline="hanging",
+            font_size=16,
+            fill=accent_color,
+            font_family="Arial"
+        ))
 
     return dwg.tostring()
