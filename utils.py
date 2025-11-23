@@ -169,8 +169,8 @@ def generate_logo_svg(
         text_anchor="middle",
         alignment_baseline="middle",
         font_size=text_font_size,
-        fill=main_color,
-        font_family="Arial",
+        fill="#000000",  # black color
+        font_family="Montserrat",  # stylish modern font
         font_weight="bold"
     ))
 
@@ -182,8 +182,8 @@ def generate_logo_svg(
             text_anchor="middle",
             alignment_baseline="hanging",
             font_size=16,
-            fill=accent_color,
-            font_family="Arial"
+            fill="#000000",  # black color
+            font_family="Montserrat"
         ))
 
     return dwg.tostring()
