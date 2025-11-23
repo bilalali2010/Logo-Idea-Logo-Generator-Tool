@@ -1,6 +1,7 @@
 import svgwrite
 import random
 import base64
+from svgwrite.filters import Filter
 
 # -------------------------
 # Supported shapes/styles
@@ -88,18 +89,15 @@ def generate_logo_svg(
     defs.add(linear_grad)
 
     # -------------------------
-    # Drop shadow (using raw SVG)
+    # Drop shadow using proper svgwrite filters
     # -------------------------
     shadow_filter_id = f"shadow{random.randint(0,1000)}"
-    shadow_filter = dwg.defs.add(dwg.filter(id=shadow_filter_id))
-    shadow_filter.add(dwg.raw(f'''
-        <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
-        <feOffset in="blur" dx="4" dy="4" result="offsetBlur"/>
-        <feMerge>
-            <feMergeNode in="offsetBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-    '''))
+    shadow_filter = defs.add(dwg.filter(id=shadow_filter_id))
+    shadow_filter.feGaussianBlur(in_='SourceAlpha', stdDeviation=4, result='blur')
+    shadow_filter.feOffset(in_='blur', dx=4, dy=4, result='offsetBlur')
+    merge = shadow_filter.feMerge()
+    merge.feMergeNode(in_='offsetBlur')
+    merge.feMergeNode(in_='SourceGraphic')
 
     # -------------------------
     # Logo group
