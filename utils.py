@@ -1,7 +1,6 @@
 import svgwrite
 import random
 import base64
-import math
 
 # -------------------------
 # Supported shapes/styles
@@ -26,6 +25,36 @@ PALETTES = {
     "Modern Dark": ["#0f1724", "#1f2937", "#334155", "#64748b"],
     "Pastel": ["#ffd6e0", "#bfe9ff", "#d7f7d9", "#fff3bf"],
     "Mono": ["#111111", "#333333", "#666666"],
+}
+
+# -------------------------
+# Templates
+# -------------------------
+TEMPLATES = {
+    "Modern Badge": {
+        "shape": "Badge / Emblem",
+        "palette": "Vibrant",
+        "include_slogan": True,
+        "custom_color": None
+    },
+    "Tech Node": {
+        "shape": "Tech Symbol",
+        "palette": "Modern Dark",
+        "include_slogan": True,
+        "custom_color": None
+    },
+    "Creative Splash": {
+        "shape": "Paint Splash",
+        "palette": "Pastel",
+        "include_slogan": False,
+        "custom_color": None
+    },
+    "Geometric Cube": {
+        "shape": "Geometric Cube",
+        "palette": "Mono",
+        "include_slogan": True,
+        "custom_color": None
+    },
 }
 
 # -------------------------
@@ -86,16 +115,12 @@ def generate_logo_svg(
         group.add(dwg.path(d=path_data, fill=main_color, opacity=0.7))
 
     elif shape == "House / Roof":
-        # triangle roof
-        group.add(dwg.polygon(points=[(150,250),(210,150),(270,250)], fill=random.choice(palette)))
-        # rectangle house body
-        group.add(dwg.rect(insert=(170,250), size=(80,80), fill=random.choice(palette)))
-        # door
-        group.add(dwg.rect(insert=(200,280), size=(20,50), fill=accent_color))
+        group.add(dwg.polygon(points=[(150,250),(210,150),(270,250)], fill=random.choice(palette)))  # roof
+        group.add(dwg.rect(insert=(170,250), size=(80,80), fill=random.choice(palette)))             # house body
+        group.add(dwg.rect(insert=(200,280), size=(20,50), fill=accent_color))                      # door
 
     elif shape == "Sports Ball":
         group.add(dwg.circle(center=(210,210), r=80, fill=random.choice(palette), stroke=accent_color, stroke_width=5))
-        # simple inner lines
         group.add(dwg.line(start=(210,130), end=(210,290), stroke=accent_color, stroke_width=3))
         group.add(dwg.line(start=(130,210), end=(290,210), stroke=accent_color, stroke_width=3))
 
@@ -124,7 +149,6 @@ def generate_logo_svg(
             group.add(dwg.circle(center=(cx,cy), r=40, fill="none", stroke=random.choice(palette), stroke_width=6, opacity=0.7))
 
     else:
-        # fallback simple circle
         group.add(dwg.circle(center=(210,210), r=80, fill=main_color, stroke=accent_color, stroke_width=5))
 
     # -------------------------
