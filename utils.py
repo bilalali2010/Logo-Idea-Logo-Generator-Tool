@@ -78,7 +78,7 @@ def generate_logo_svg(
     defs = dwg.defs
 
     # -------------------------
-    # Gradients & Shadows
+    # Gradient
     # -------------------------
     gradient_id = f"grad{random.randint(0,1000)}"
     linear_grad = dwg.linearGradient((0,0),(1,1), id=gradient_id)
@@ -87,14 +87,21 @@ def generate_logo_svg(
         linear_grad.add_stop_color(1, palette[-1])
     defs.add(linear_grad)
 
+    # -------------------------
+    # Drop shadow (working version)
+    # -------------------------
     shadow_filter = dwg.filter(id=f"shadow{random.randint(0,1000)}")
-    shadow_filter.feDropShadow(dx=4, dy=4, stdDeviation=4, flood_color="#000000", flood_opacity=0.3)
+    blur = shadow_filter.feGaussianBlur(in_="SourceAlpha", stdDeviation=4, result="blur")
+    offset = shadow_filter.feOffset(in_="blur", dx=4, dy=4, result="offsetBlur")
+    merge = shadow_filter.feMerge()
+    merge.add_feMergeNode(in_="offsetBlur")
+    merge.add_feMergeNode(in_="SourceGraphic")
     defs.add(shadow_filter)
 
-    group = dwg.g(id="logo_group", filter=shadow_filter.get_funciri())
+    group = dwg.g(id="logo_group", filter=f"url(#{shadow_filter.get_id()})")
 
     # -------------------------
-    # Shape drawing logic
+    # Shape drawing
     # -------------------------
     if shape == "Abstract Swirl":
         for i in range(6):
@@ -102,26 +109,26 @@ def generate_logo_svg(
             cy = random.randint(80, 340)
             r = random.randint(30, 80)
             opacity = random.uniform(0.3, 0.7)
-            group.add(dwg.circle(center=(cx, cy), r=r, fill="url(#%s)"%gradient_id, stroke=accent_color, stroke_width=6, opacity=opacity))
+            group.add(dwg.circle(center=(cx, cy), r=r, fill=f"url(#{gradient_id})", stroke=accent_color, stroke_width=6, opacity=opacity))
 
     elif shape == "Geometric Cube":
         for i in range(3):
             x = random.randint(50, 280)
             y = random.randint(50, 280)
             s = random.randint(60, 100)
-            group.add(dwg.rect(insert=(x, y), size=(s, s), fill="url(#%s)"%gradient_id, stroke=accent_color, stroke_width=5, opacity=0.9))
+            group.add(dwg.rect(insert=(x, y), size=(s, s), fill=f"url(#{gradient_id})", stroke=accent_color, stroke_width=5, opacity=0.9))
 
     elif shape == "Rounded Blob":
         path_data = f"M{random.randint(100,150)},200 Q{random.randint(180,220)},100 {random.randint(250,300)},200 Q{random.randint(180,220)},300 {random.randint(100,150)},200 Z"
-        group.add(dwg.path(d=path_data, fill="url(#%s)"%gradient_id, opacity=0.8))
+        group.add(dwg.path(d=path_data, fill=f"url(#{gradient_id})", opacity=0.8))
 
     elif shape == "House / Roof":
-        group.add(dwg.polygon(points=[(150,250),(210,150),(270,250)], fill="url(#%s)"%gradient_id))
-        group.add(dwg.rect(insert=(170,250), size=(80,80), fill="url(#%s)"%gradient_id))
+        group.add(dwg.polygon(points=[(150,250),(210,150),(270,250)], fill=f"url(#{gradient_id})"))
+        group.add(dwg.rect(insert=(170,250), size=(80,80), fill=f"url(#{gradient_id})"))
         group.add(dwg.rect(insert=(200,280), size=(20,50), fill=accent_color))
 
     elif shape == "Sports Ball":
-        group.add(dwg.circle(center=(210,210), r=80, fill="url(#%s)"%gradient_id, stroke=accent_color, stroke_width=5))
+        group.add(dwg.circle(center=(210,210), r=80, fill=f"url(#{gradient_id})", stroke=accent_color, stroke_width=5))
         group.add(dwg.line(start=(210,130), end=(210,290), stroke=accent_color, stroke_width=3))
         group.add(dwg.line(start=(130,210), end=(290,210), stroke=accent_color, stroke_width=3))
 
@@ -129,11 +136,11 @@ def generate_logo_svg(
         for i in range(5):
             x = random.randint(120,300)
             y = random.randint(120,300)
-            group.add(dwg.circle(center=(x,y), r=10, fill="url(#%s)"%gradient_id))
+            group.add(dwg.circle(center=(x,y), r=10, fill=f"url(#{gradient_id})"))
             group.add(dwg.line(start=(210,210), end=(x,y), stroke=accent_color, stroke_width=2))
 
     elif shape == "Badge / Emblem":
-        group.add(dwg.circle(center=(210,210), r=100, fill="url(#%s)"%gradient_id, stroke=accent_color, stroke_width=5))
+        group.add(dwg.circle(center=(210,210), r=100, fill=f"url(#{gradient_id})", stroke=accent_color, stroke_width=5))
         group.add(dwg.circle(center=(210,210), r=70, fill="none", stroke=accent_color, stroke_width=3))
 
     elif shape == "Paint Splash":
@@ -141,16 +148,16 @@ def generate_logo_svg(
             cx = random.randint(100,320)
             cy = random.randint(100,320)
             r = random.randint(10,40)
-            group.add(dwg.circle(center=(cx,cy), r=r, fill="url(#%s)"%gradient_id, opacity=random.uniform(0.3,0.7)))
+            group.add(dwg.circle(center=(cx,cy), r=r, fill=f"url(#{gradient_id})", opacity=random.uniform(0.3,0.7)))
 
     elif shape == "Linked Rings":
         for i in range(3):
             cx = 180 + i*50
             cy = 210
-            group.add(dwg.circle(center=(cx,cy), r=40, fill="none", stroke="url(#%s)"%gradient_id, stroke_width=6, opacity=0.7))
+            group.add(dwg.circle(center=(cx,cy), r=40, fill="none", stroke=f"url(#{gradient_id})", stroke_width=6, opacity=0.7))
 
     else:
-        group.add(dwg.circle(center=(210,210), r=80, fill="url(#%s)"%gradient_id, stroke=accent_color, stroke_width=5))
+        group.add(dwg.circle(center=(210,210), r=80, fill=f"url(#{gradient_id})", stroke=accent_color, stroke_width=5))
 
     # -------------------------
     # Embed image if provided
@@ -161,7 +168,7 @@ def generate_logo_svg(
     dwg.add(group)
 
     # -------------------------
-    # Add brand text inside shape with outline
+    # Brand & slogan text (outlined)
     # -------------------------
     text_font_size = 28 if len(brand) <= 12 else max(12, 28 - len(brand)//2)
     dwg.add(dwg.text(
@@ -170,14 +177,13 @@ def generate_logo_svg(
         text_anchor="middle",
         alignment_baseline="middle",
         font_size=text_font_size,
-        fill="#000000",  # black color
-        stroke="#ffffff",  # white outline for readability
+        fill="#000000",
+        stroke="#ffffff",  # outline
         stroke_width=1.5,
         font_family="Montserrat",
         font_weight="bold"
     ))
 
-    # Optional slogan inside shape, below brand
     if include_slogan and slogan:
         dwg.add(dwg.text(
             slogan,
