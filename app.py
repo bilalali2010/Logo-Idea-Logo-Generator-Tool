@@ -1,14 +1,4 @@
-# AI Logo Generator — Multi-Shape (Streamlit)
 
-
-This file set contains a ready-to-deploy Streamlit app that generates professional SVG logos in multiple styles (abstract swirl, geometric cube, rounded blob, house/roof, sports ball, tech symbol, badge/emblem, paint splash, linked rings). It includes color palettes, optional slogan generation, and the ability to embed a raster image (sample file included).
-
-
----
-
-
-## app.py
-```python
 import streamlit as st
 from utils import (
 generate_logo_svg,
