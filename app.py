@@ -16,10 +16,15 @@ st.set_page_config(page_title="AI Logo Generator — Multi Shape", layout="wide"
 st.title("AI Logo Generator — Multi-Shape Professional Logos")
 st.write("Generate modern, high-quality SVG logos in multiple styles. No GPU required — pure SVG + Python.")
 
+# ⭐ ADDED MESSAGE ⭐
+st.markdown("""
+### ℹ️ Tip: in Mobile phone Click the *double arrow ( > ) on the top-left sidebar* to edit your Brand Name, Slogan, Colors and Styles.
+""")
+
 # -------------------------
 # Template selection
 # -------------------------
-st.markdown("**Templates**")
+st.markdown("*Templates*")
 selected_template_name = st.selectbox("Choose a starting template (optional)", ["None"] + list(TEMPLATES.keys()))
 
 # Default settings
@@ -45,7 +50,7 @@ if selected_template_name != "None":
         palette=PALETTES[template["palette"]],
         seed=0
     )
-    st.markdown("**Template Preview:**")
+    st.markdown("*Template Preview:*")
     st.components.v1.html(svg_preview, height=200)
 
 # -------------------------
@@ -53,7 +58,7 @@ if selected_template_name != "None":
 # -------------------------
 with st.sidebar:
     st.header("Generator Settings")
-    brand = st.text_input("Brand name", value="Bilal Tech")
+    brand = st.text_input("Brand name", value="write your brand name")
     slogan = st.text_input("Slogan (optional)")
     color_palette = st.selectbox("Color Palette", list(PALETTES.keys()), index=list(PALETTES.keys()).index(palette_choice))
     shape_style = st.selectbox("Shape Style", SHAPES, index=SHAPES.index(shape_style))
@@ -62,7 +67,7 @@ with st.sidebar:
     embed_sample = st.checkbox("Embed sample image inside logo (demo)")
 
 # Multiple shape selection
-st.markdown("**Styles**")
+st.markdown("*Styles*")
 selected_shapes = st.multiselect(
     "Choose shapes/styles (you can pick multiple)",
     SHAPES,
@@ -70,14 +75,14 @@ selected_shapes = st.multiselect(
 )
 
 # Color options
-st.markdown("**Colors**")
+st.markdown("*Colors*")
 palette_choice = st.selectbox("Palette", list(PALETTES.keys()), index=list(PALETTES.keys()).index(palette_choice))
 color_mode = st.radio("Color mode", ["Palette (recommended)", "Custom main color", "Black & White"], index=0)
 if color_mode == "Custom main color" and custom_color is None:
     custom_color = st.color_picker("Choose main color", "#1f77b4")
 
 # Image upload
-st.markdown("**Input image**")
+st.markdown("*Input image*")
 uploaded_file = st.file_uploader("Upload an icon or image to embed (optional)")
 sample_local_path = "/mnt/data/A_2D_digital_graphic_design_compilation_features_n.png"
 
@@ -124,7 +129,7 @@ if st.button("Generate Logos"):
     cols = st.columns(3)
     for idx, (shape, svg) in enumerate(generated_svgs):
         with cols[idx % 3]:
-            st.write(f"**{shape}**")
+            st.write(f"*{shape}*")
             st.components.v1.html(svg, height=450)
             st.download_button(
                 label="Download SVG",
